@@ -6,8 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
 import org.thymeleaf.ITemplateEngine;
+import org.thymeleaf.spring5.ISpringTemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
+import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
 @Configuration
@@ -17,7 +20,7 @@ public class ThymeleafConfig {
     private ApplicationContext applicationContext;
 
     @Bean
-    public ViewResolver thymeleafViewResolver(ITemplateEngine templateEngine) {
+    public ViewResolver thymeleafViewResolver(ISpringTemplateEngine templateEngine) {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 
         viewResolver.setOrder(1);
@@ -29,7 +32,7 @@ public class ThymeleafConfig {
     }
 
     @Bean
-    public ITemplateEngine templateEngine(ITemplateResolver templateResolver) {
+    public ISpringTemplateEngine templateEngine(ITemplateResolver templateResolver) {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
 
         templateEngine.setTemplateResolver(templateResolver);
