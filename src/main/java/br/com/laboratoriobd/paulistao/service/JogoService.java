@@ -1,5 +1,6 @@
 package br.com.laboratoriobd.paulistao.service;
 
+import br.com.laboratoriobd.paulistao.exception.BusinessException;
 import br.com.laboratoriobd.paulistao.model.Jogo;
 import br.com.laboratoriobd.paulistao.model.Time;
 import br.com.laboratoriobd.paulistao.model.dto.JogoDTO;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,18 +31,27 @@ public class JogoService {
         this.builder = builder;
     }
 
-    public JogoDTO pesquisar(String dataJogo) {
-        JogoDTO retorno = new JogoDTO();
-        Optional<Jogo> jogo = repository.findByData(dataJogo);
+    public List<JogoDTO> pesquisar(String dataJogo) {
+        List<JogoDTO> jogos = new ArrayList<>();
 
-        if (jogo.isPresent()) {
-            retorno.setData(jogo.get().getData());
+        List<Jogo> jogoExistentes = repository.findByData(dataJogo);
 
-            List<Time> times = detalheTimes(jogo.get().getId().getCodigoPrimeiroTime(), jogo.get().getId().getCodigoSegundoTime());
-            retorno.setPrimeiroTime(times.get(0).getNome());
-            retorno.setSegundoTime(times.get(1).getNome());
+        if (!jogoExistentes.isEmpty()) {
+            for (int i=0; i < jogoExistentes.size(); i++) {
+                JogoDTO retorno = new JogoDTO();
+                retorno.setData(jogoExistentes.get(i).getData());
+                repositoryTime.findByCodigoTime(jogoExistentes.get(i).getId().getCodigoPrimeiroTime()).
+                        ifPresent(time -> retorno.setPrimeiroTime(time.getNome()));
+                repositoryTime.findByCodigoTime(jogoExistentes.get(i).getId().getCodigoSegundoTime()).
+                        ifPresent(time -> retorno.setSegundoTime(time.getNome()));
+                jogos.add(retorno);
+            }
+         } else {
+            throw new BusinessException("NAO HA JOGOS PARA ESSA DATA");
         }
-        return retorno;
+
+
+        return jogos;
     }
 
     private List<Time> detalheTimes(int timeA, int timeB) {
@@ -48,8 +59,9 @@ public class JogoService {
     }
 
     public void gerarJogos() {
-        log.info("Iniciando geracao dos jogos... timestamp[{}]", LocalDateTime.now());
+        log.info("Iniciando geracao dos jogos. timestamp [{}]", LocalDateTime.now());
         builder.montarJogosCampeonato();
-        log.info("Jogos gerados com sucesso... timestamp[{}]", LocalDateTime.now());
+        log.info("Jogos gerados com sucesso.   timestamp[{}]", LocalDateTime.now());
     }
 }
+

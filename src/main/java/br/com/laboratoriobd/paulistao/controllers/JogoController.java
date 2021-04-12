@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/jogos")
 public class JogoController {
@@ -22,11 +24,11 @@ public class JogoController {
     }
 
     @GetMapping
-    public ResponseEntity<JogoDTO> detalhe(@RequestParam String dataJogo) {
+    public ResponseEntity<List<JogoDTO>> detalhe(@RequestParam String dataJogo) {
         return ResponseEntity.ok().body(service.pesquisar(dataJogo));
     }
 
-    @GetMapping("/gerar")
+    @GetMapping("/criacao")
     public ResponseEntity<Void> gerarJogos() {
         service.gerarJogos();
         return ResponseEntity.ok().build();
