@@ -1,4 +1,4 @@
-package br.com.laboratoriobd.paulistao.controllers.rest;
+package br.com.laboratoriobd.paulistao.controllers;
 
 import br.com.laboratoriobd.paulistao.model.dto.JogoDTO;
 import br.com.laboratoriobd.paulistao.service.JogoService;
