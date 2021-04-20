@@ -10,7 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JogoDTO {
-    private String data;
+
     private String primeiroTime;
     private String segundoTime;
+    private String data;
+    private int golsPrimeiroTime;
+    private int golsSegundoTime;
 }

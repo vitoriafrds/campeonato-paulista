@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface JogoRepository extends JpaRepository<Jogo, JogoPK> {
 
     List<Jogo> findByData(String data);
+
+    Optional<Jogo> findFirstByData(String data);
 }

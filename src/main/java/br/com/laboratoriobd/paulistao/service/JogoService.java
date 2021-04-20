@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+
 @Slf4j
 @Service
 public class JogoService {
@@ -30,38 +31,41 @@ public class JogoService {
         this.repositoryTime = timeRepository;
         this.builder = builder;
     }
-
-    public List<JogoDTO> pesquisar(String dataJogo) {
-        List<JogoDTO> jogos = new ArrayList<>();
-
-        List<Jogo> jogoExistentes = repository.findByData(dataJogo);
-
-        if (!jogoExistentes.isEmpty()) {
-            for (int i=0; i < jogoExistentes.size(); i++) {
-                JogoDTO retorno = new JogoDTO();
-                retorno.setData(jogoExistentes.get(i).getData());
-                repositoryTime.findByCodigoTime(jogoExistentes.get(i).getId().getCodigoPrimeiroTime()).
-                        ifPresent(time -> retorno.setPrimeiroTime(time.getNome()));
-                repositoryTime.findByCodigoTime(jogoExistentes.get(i).getId().getCodigoSegundoTime()).
-                        ifPresent(time -> retorno.setSegundoTime(time.getNome()));
-                jogos.add(retorno);
-            }
-         } else {
-            throw new BusinessException("NAO HA JOGOS PARA ESSA DATA");
-        }
-
-
-        return jogos;
-    }
-
-    private List<Time> detalheTimes(int timeA, int timeB) {
-        return repositoryTime.listarPorNome(timeA, timeB);
-    }
-
+    
     public void gerarJogos() {
         log.info("Iniciando geracao dos jogos. timestamp [{}]", LocalDateTime.now());
         builder.montarJogosCampeonato();
         log.info("Jogos gerados com sucesso.   timestamp[{}]", LocalDateTime.now());
+    }
+
+    public void definirPlacar(int placarTimeA, int placarTimeB, String dataJogo) {
+        Optional<Jogo> jogo = repository.findFirstByData(dataJogo);
+
+        jogo.ifPresent(x -> {
+            jogo.get().setTotalGolsPrimeiroTime(placarTimeA);
+            jogo.get().setTotalGolsSegundoTime(placarTimeB);
+            repository.save(jogo.get());
+        });
+    }
+
+    public JogoDTO detalheJogo(String data) {
+
+        JogoDTO retorno = new JogoDTO();
+        Optional<Jogo> jogo = repository.findFirstByData(data);
+
+        jogo.ifPresent(x -> {
+            retorno.setData(x.getData());
+            retorno.setGolsPrimeiroTime(x.getTotalGolsPrimeiroTime());
+            retorno.setGolsSegundoTime(x.getTotalGolsSegundoTime());
+            retorno.setPrimeiroTime(buscarNomeTime(x.getId().getCodigoPrimeiroTime()));
+            retorno.setSegundoTime(buscarNomeTime(x.getId().getCodigoSegundoTime()));
+        });
+
+        return retorno;
+    }
+
+    private String buscarNomeTime(int codigoTime) {
+        return repositoryTime.findByCodigoTime(codigoTime).map(Time::getNome).orElse(null);
     }
 }
 
